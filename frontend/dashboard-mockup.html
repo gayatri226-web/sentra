@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sentra — SOC Dashboard (Concept Mockup)</title>
+<style>
+  :root{
+    --page:#0d0d0d;
+    --surface:#1a1a19;
+    --surface-2:#212120;
+    --ink:#ffffff;
+    --ink-2:#c3c2b7;
+    --ink-muted:#898781;
+    --border:rgba(255,255,255,0.10);
+    --grid:#2c2c2a;
+
+    --good:#0ca30c;
+    --warning:#fab219;
+    --serious:#ec835a;
+    --critical:#d03b3b;
+
+    --brand:#ef3a54;
+    --brand-dim: rgba(239,58,84,0.14);
+
+    --type-network:#3987e5;
+    --type-behavioral:#9085e9;
+    --type-identity:#199e70;
+
+    --font: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; background:var(--page); color:var(--ink); font-family:var(--font); }
+  body{ font-size:14px; line-height:1.45; }
+
+  .app{ display:grid; grid-template-columns:220px 1fr; grid-template-rows:60px 1fr; grid-template-areas:"header header" "sidebar main"; min-height:100vh; }
+
+  /* header */
+  .header{ grid-area:header; display:flex; align-items:center; justify-content:space-between; padding:0 20px; border-bottom:1px solid var(--border); background:var(--surface); }
+  .brand{ display:flex; align-items:center; gap:10px; }
+  .brand-dot{ width:9px; height:9px; border-radius:2px; background:var(--brand); }
+  .brand-name{ font-weight:700; letter-spacing:0.08em; font-size:15px; }
+  .brand-sub{ color:var(--ink-muted); font-size:12px; margin-left:10px; padding-left:10px; border-left:1px solid var(--border); }
+  .header-right{ display:flex; align-items:center; gap:18px; }
+  .live-pill{ display:flex; align-items:center; gap:7px; font-size:12px; color:var(--ink-2); background:var(--surface-2); border:1px solid var(--border); padding:6px 10px; border-radius:20px; }
+  .live-dot{ width:7px; height:7px; border-radius:50%; background:var(--good); box-shadow:0 0 0 3px rgba(12,163,12,0.18); }
+  .user{ display:flex; align-items:center; gap:8px; font-size:12px; color:var(--ink-2); }
+  .avatar{ width:26px; height:26px; border-radius:50%; background:var(--type-behavioral); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#fff; }
+
+  /* sidebar */
+  .sidebar{ grid-area:sidebar; border-right:1px solid var(--border); background:var(--surface); padding:16px 10px; display:flex; flex-direction:column; gap:2px; }
+  .nav-item{ display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; color:var(--ink-2); cursor:pointer; font-size:13px; border-left:3px solid transparent; user-select:none; }
+  .nav-item:hover{ background:var(--surface-2); color:var(--ink); }
+  .nav-item.active{ background:var(--brand-dim); color:var(--ink); border-left:3px solid var(--brand); font-weight:600; }
+  .nav-icon{ width:16px; text-align:center; opacity:0.85; }
+  .sidebar-foot{ margin-top:auto; padding:12px; font-size:11px; color:var(--ink-muted); border-top:1px solid var(--border); }
+
+  /* main */
+  .main{ grid-area:main; padding:22px 26px 40px; overflow-y:auto; }
+  .view{ display:none; }
+  .view.active{ display:block; }
+
+  h1.page-title{ font-size:18px; margin:0 0 4px; }
+  p.page-sub{ margin:0 0 20px; color:var(--ink-muted); font-size:12.5px; }
+
+  /* stat tiles */
+  .stat-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px; }
+  .stat-tile{ background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:16px 16px; }
+  .stat-label{ color:var(--ink-muted); font-size:11.5px; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:8px; }
+  .stat-value{ font-size:28px; font-weight:600; line-height:1; }
+  .stat-delta{ margin-top:8px; font-size:11.5px; color:var(--ink-2); }
+  .stat-delta.up{ color:var(--critical); }
+  .stat-delta.down{ color:var(--good); }
+
+  /* panel */
+  .panel{ background:var(--surface); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+  .panel-head{ display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid var(--border); }
+  .panel-title{ font-size:13.5px; font-weight:600; }
+  .legend{ display:flex; gap:14px; font-size:11.5px; color:var(--ink-muted); }
+  .legend span{ display:inline-flex; align-items:center; gap:5px; }
+  .legend i{ width:8px; height:8px; border-radius:50%; display:inline-block; }
+
+  /* incident table */
+  table{ width:100%; border-collapse:collapse; }
+  thead th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.04em; color:var(--ink-muted); font-weight:600; padding:10px 18px; border-bottom:1px solid var(--border); }
+  tbody td{ padding:13px 18px; border-bottom:1px solid var(--grid); font-size:13px; vertical-align:middle; }
+  tbody tr{ cursor:pointer; }
+  tbody tr:hover{ background:var(--surface-2); }
+  tbody tr:last-child td{ border-bottom:none; }
+
+  .badge{ display:inline-flex; align-items:center; gap:6px; padding:4px 9px; border-radius:20px; font-size:11.5px; font-weight:600; border:1px solid var(--border); }
+  .badge i{ width:7px; height:7px; border-radius:50%; display:inline-block; }
+  .badge.risk-low{ color:var(--good); }
+  .badge.risk-medium{ color:var(--warning); }
+  .badge.risk-high{ color:var(--serious); }
+  .badge.risk-critical{ color:var(--critical); }
+  .badge i.dot-low{ background:var(--good); }
+  .badge i.dot-medium{ background:var(--warning); }
+  .badge i.dot-high{ background:var(--serious); }
+  .badge i.dot-critical{ background:var(--critical); }
+
+  .tag{ display:inline-flex; align-items:center; gap:6px; font-size:11.5px; color:var(--ink-2); }
+  .tag i{ width:7px; height:7px; border-radius:2px; display:inline-block; }
+  .tag.network i{ background:var(--type-network); }
+  .tag.behavioral i{ background:var(--type-behavioral); }
+  .tag.identity i{ background:var(--type-identity); }
+
+  .status-text{ font-size:12px; color:var(--ink-muted); }
+  .status-text.pending{ color:var(--warning); }
+  .status-text.blocked{ color:var(--good); }
+  .status-text.reviewed{ color:var(--ink-2); }
+
+  .muted{ color:var(--ink-muted); }
+
+  /* incident detail */
+  .back-btn{ display:inline-flex; align-items:center; gap:6px; color:var(--ink-2); background:none; border:1px solid var(--border); padding:7px 12px; border-radius:8px; cursor:pointer; font-size:12.5px; margin-bottom:16px; }
+  .back-btn:hover{ background:var(--surface-2); color:var(--ink); }
+
+  .detail-grid{ display:grid; grid-template-columns:1.5fr 1fr; gap:18px; align-items:start; }
+
+  .detail-card{ background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:20px; margin-bottom:18px; }
+  .detail-card h3{ margin:0 0 14px; font-size:13.5px; }
+
+  .contact-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+  .contact-name{ font-size:16px; font-weight:600; }
+  .contact-meta{ font-size:12px; color:var(--ink-muted); margin-top:2px; }
+
+  /* meter */
+  .meter-wrap{ margin-top:16px; }
+  .meter-label{ display:flex; justify-content:space-between; font-size:12px; color:var(--ink-muted); margin-bottom:6px; }
+  .meter-value{ font-weight:700; }
+  .meter-track{ height:10px; border-radius:6px; background:rgba(255,255,255,0.06); overflow:hidden; }
+  .meter-fill{ height:100%; border-radius:6px; }
+
+  /* timeline */
+  .timeline{ display:flex; flex-direction:column; gap:0; }
+  .tl-step{ display:flex; gap:14px; padding:14px 0; border-bottom:1px solid var(--grid); }
+  .tl-step:last-child{ border-bottom:none; }
+  .tl-icon{ width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; background:var(--surface-2); border:1px solid var(--border); }
+  .tl-body{ flex:1; }
+  .tl-title{ font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px; }
+  .tl-desc{ font-size:12.5px; color:var(--ink-2); margin-top:3px; }
+  .flag{ font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:10px; text-transform:uppercase; letter-spacing:0.03em; }
+  .flag.flagged{ background:rgba(208,59,59,0.16); color:var(--critical); }
+  .flag.clear{ background:rgba(12,163,12,0.14); color:var(--good); }
+
+  .evidence-box{ display:flex; gap:12px; align-items:flex-start; background:rgba(208,59,59,0.08); border:1px solid rgba(208,59,59,0.3); border-radius:10px; padding:14px 16px; margin-bottom:18px; }
+  .evidence-box .tl-icon{ background:rgba(208,59,59,0.16); border-color:rgba(208,59,59,0.3); }
+  .evidence-title{ font-size:13px; font-weight:600; color:var(--critical); margin-bottom:3px; }
+  .evidence-desc{ font-size:12.5px; color:var(--ink-2); }
+
+  .action-row{ display:flex; flex-direction:column; gap:10px; }
+  .btn{ padding:11px 14px; border-radius:8px; font-size:13px; font-weight:600; border:1px solid var(--border); cursor:pointer; text-align:left; display:flex; align-items:center; justify-content:space-between; }
+  .btn.primary{ background:var(--brand); border-color:var(--brand); color:#fff; }
+  .btn.primary:hover{ filter:brightness(1.08); }
+  .btn.secondary{ background:var(--surface-2); color:var(--ink); }
+  .btn.secondary:hover{ background:#2a2a28; }
+  .btn.ghost{ background:transparent; color:var(--ink-2); }
+  .btn.ghost:hover{ background:var(--surface-2); }
+
+  .toast{ position:fixed; bottom:24px; right:24px; background:var(--surface-2); border:1px solid var(--border); border-left:3px solid var(--good); padding:12px 16px; border-radius:8px; font-size:12.5px; box-shadow:0 8px 24px rgba(0,0,0,0.4); display:none; align-items:center; gap:8px; max-width:280px; }
+  .toast.show{ display:flex; }
+
+  /* review queue */
+  .queue-row-actions{ display:flex; gap:8px; }
+  .mini-btn{ font-size:11.5px; padding:6px 10px; border-radius:6px; border:1px solid var(--border); background:var(--surface-2); color:var(--ink-2); cursor:pointer; }
+  .mini-btn:hover{ color:var(--ink); }
+
+  /* campaigns */
+  .campaign-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+  .campaign-card{ background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:18px; }
+  .campaign-head{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+  .campaign-title{ font-size:13.5px; font-weight:600; }
+  .campaign-count{ font-size:11px; padding:3px 8px; border-radius:20px; background:rgba(236,131,90,0.16); color:var(--serious); font-weight:700; }
+  .device-chip-row{ display:flex; gap:6px; margin-top:12px; flex-wrap:wrap; }
+  .device-chip{ font-size:11px; color:var(--ink-2); background:var(--surface-2); border:1px solid var(--border); padding:4px 9px; border-radius:6px; }
+
+  .footnote{ margin-top:26px; font-size:11.5px; color:var(--ink-muted); border-top:1px solid var(--border); padding-top:14px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <div class="brand">
+      <span class="brand-dot"></span>
+      <span class="brand-name">SENTRA</span>
+      <span class="brand-sub">SOC Dashboard · Riverside High (Pilot)</span>
+    </div>
+    <div class="header-right">
+      <div class="live-pill"><span class="live-dot"></span> Monitoring active</div>
+      <div class="user"><span class="avatar">JA</span> J. Alvarez · Safety Officer</div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="nav-item active" data-view="overview"><span class="nav-icon">&#9737;</span> Overview</div>
+    <div class="nav-item" data-view="queue"><span class="nav-icon">&#9873;</span> Review Queue</div>
+    <div class="nav-item" data-view="campaigns"><span class="nav-icon">&#9737;</span> Campaigns</div>
+    <div class="nav-item" data-view="evidence"><span class="nav-icon">&#128274;</span> Evidence Vault</div>
+    <div class="nav-item" data-view="settings"><span class="nav-icon">&#9881;</span> Settings</div>
+    <div class="sidebar-foot">Concept mockup — for visualizing the idea before building. No real data.</div>
+  </div>
+
+  <div class="main">
+
+    <!-- OVERVIEW -->
+    <div class="view active" id="view-overview">
+      <h1 class="page-title">Overview</h1>
+      <p class="page-sub">What Sentra is currently seeing across the school network and enrolled devices.</p>
+
+      <div class="stat-row">
+        <div class="stat-tile">
+          <div class="stat-label">Active alerts</div>
+          <div class="stat-value">7</div>
+          <div class="stat-delta up">&#9650; 2 vs yesterday</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-label">Auto-blocked today</div>
+          <div class="stat-value">23</div>
+          <div class="stat-delta down">&#9660; known threats, no review needed</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-label">Pending human review</div>
+          <div class="stat-value">3</div>
+          <div class="stat-delta">avg. wait 41 min</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-label">Devices monitored</div>
+          <div class="stat-value">312</div>
+          <div class="stat-delta">network mode only</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Live incident feed</div>
+          <div class="legend">
+            <span><i style="background:var(--good)"></i> Low</span>
+            <span><i style="background:var(--warning)"></i> Medium</span>
+            <span><i style="background:var(--serious)"></i> High</span>
+            <span><i style="background:var(--critical)"></i> Critical</span>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Risk</th>
+              <th>Type</th>
+              <th>Summary</th>
+              <th>Device / Contact</th>
+              <th>Time</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="incident-tbody">
+            <!-- rows injected by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- INCIDENT DETAIL -->
+    <div class="view" id="view-detail">
+      <button class="back-btn" onclick="showView('overview')">&#8592; Back to overview</button>
+
+      <div class="detail-grid">
+        <div>
+          <div class="detail-card">
+            <div class="contact-row">
+              <div>
+                <div class="contact-name" id="d-contact">chill_gamer22</div>
+                <div class="contact-meta" id="d-meta">New contact on Discord · added 2 days ago · device: iPad-Rm14-07</div>
+              </div>
+              <span class="badge risk-critical" id="d-badge"><i class="dot-critical"></i> Critical</span>
+            </div>
+            <div class="meter-wrap">
+              <div class="meter-label"><span>Risk score</span><span class="meter-value" id="d-score">86 / 100</span></div>
+              <div class="meter-track"><div class="meter-fill" id="d-meter" style="width:86%; background:var(--critical);"></div></div>
+            </div>
+          </div>
+
+          <div class="detail-card">
+            <h3>Detection timeline</h3>
+            <div class="timeline" id="d-timeline">
+              <!-- injected -->
+            </div>
+          </div>
+
+          <div class="evidence-box">
+            <div class="tl-icon">&#128274;</div>
+            <div>
+              <div class="evidence-title">Evidence locked</div>
+              <div class="evidence-desc">A tamper-proof metadata timeline (contact history, timing, platform-switch requests) was saved automatically the moment this crossed the review threshold — before it could be deleted.</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="detail-card">
+            <h3>Human review</h3>
+            <p class="page-sub" style="margin-bottom:14px;">Nothing here auto-blocks or punishes. A trained staff member decides what happens next.</p>
+            <div class="action-row">
+              <button class="btn primary" onclick="toast('Escalated to counselor for follow-up.')">Escalate to counselor <span>&#8594;</span></button>
+              <button class="btn secondary" onclick="toast('Guardian will be notified per school policy.')">Contact guardian <span>&#8594;</span></button>
+              <button class="btn secondary" onclick="toast('Marked as safe. Evidence stays archived.')">Mark as safe <span>&#8594;</span></button>
+              <button class="btn ghost" onclick="toast('Opening full metadata record…')">View full evidence log <span>&#8594;</span></button>
+            </div>
+          </div>
+
+          <div class="detail-card">
+            <h3>Why this was flagged</h3>
+            <p class="tl-desc" style="margin:0;">This matches the pattern documented in real grooming cases: a new contact, a fast trust-building phase, then a request to move somewhere less monitored — combined with a stolen profile photo. No message content was read to reach this score.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REVIEW QUEUE -->
+    <div class="view" id="view-queue">
+      <h1 class="page-title">Review queue</h1>
+      <p class="page-sub">Ambiguous signals waiting on a trained staff member — nothing here has been auto-actioned.</p>
+      <div class="panel">
+        <table>
+          <thead>
+            <tr><th>Risk</th><th>Type</th><th>Summary</th><th>Waiting</th><th>Assigned to</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge risk-critical"><i class="dot-critical"></i> Critical</span></td>
+              <td><span class="tag behavioral"><i></i> Behavioral</span></td>
+              <td>Platform-switch request + late-night spike — chill_gamer22</td>
+              <td class="muted">41 min</td>
+              <td class="muted">J. Alvarez</td>
+              <td><div class="queue-row-actions"><button class="mini-btn" onclick="showView('detail')">Open</button></div></td>
+            </tr>
+            <tr>
+              <td><span class="badge risk-high"><i class="dot-high"></i> High</span></td>
+              <td><span class="tag identity"><i></i> Identity</span></td>
+              <td>Reverse-image match: stock photo used as profile picture</td>
+              <td class="muted">1h 12m</td>
+              <td class="muted">Unassigned</td>
+              <td><div class="queue-row-actions"><button class="mini-btn" onclick="toast('Assigned to you.')">Assign to me</button></div></td>
+            </tr>
+            <tr>
+              <td><span class="badge risk-medium"><i class="dot-medium"></i> Medium</span></td>
+              <td><span class="tag behavioral"><i></i> Behavioral</span></td>
+              <td>Unusual contact-frequency increase, no platform switch yet</td>
+              <td class="muted">2h 03m</td>
+              <td class="muted">R. Patel</td>
+              <td><div class="queue-row-actions"><button class="mini-btn" onclick="toast('Opening record…')">Open</button></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CAMPAIGNS -->
+    <div class="view" id="view-campaigns">
+      <h1 class="page-title">Campaigns</h1>
+      <p class="page-sub">When the same contact or indicator shows up on more than one device, Sentra groups it so the team can act once instead of per-device.</p>
+      <div class="campaign-grid">
+        <div class="campaign-card">
+          <div class="campaign-head">
+            <div>
+              <div class="campaign-title">chill_gamer22 — fake profile</div>
+              <div class="tl-desc">Same stolen photo + near-identical bio</div>
+            </div>
+            <span class="campaign-count">3 devices</span>
+          </div>
+          <div class="device-chip-row">
+            <span class="device-chip">iPad-Rm14-07</span>
+            <span class="device-chip">Chromebook-22</span>
+            <span class="device-chip">iPad-Rm09-03</span>
+          </div>
+        </div>
+        <div class="campaign-card">
+          <div class="campaign-head">
+            <div>
+              <div class="campaign-title">phish-schoolportal-login.com</div>
+              <div class="tl-desc">Lookalike domain, auto-blocked at network level</div>
+            </div>
+            <span class="campaign-count">11 devices</span>
+          </div>
+          <div class="device-chip-row">
+            <span class="device-chip">+11 devices, network-wide</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EVIDENCE VAULT -->
+    <div class="view" id="view-evidence">
+      <h1 class="page-title">Evidence vault</h1>
+      <p class="page-sub">Tamper-proof metadata timelines, locked automatically once an incident crosses the review threshold. Content is never stored — only metadata (timing, contact history, platform-switch events).</p>
+      <div class="panel">
+        <table>
+          <thead><tr><th>Case</th><th>Locked on</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>chill_gamer22 — behavioral + identity</td><td class="muted">Aug 19, 11:42 PM</td><td class="status-text pending">Under review</td><td><button class="mini-btn" onclick="toast('Opening secured record…')">View</button></td></tr>
+            <tr><td>unknown_contact_88 — behavioral only</td><td class="muted">Aug 14, 9:05 PM</td><td class="status-text reviewed">Closed — false positive</td><td><button class="mini-btn" onclick="toast('Opening secured record…')">View</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="view" id="view-settings">
+      <h1 class="page-title">Settings</h1>
+      <p class="page-sub">Policy controls the institution sets — this is a placeholder view for the concept.</p>
+      <div class="detail-card">
+        <h3>Enforcement policy</h3>
+        <p class="tl-desc">Known-threat auto-block: <b style="color:var(--ink)">On</b> · Behavioral auto-block: <b style="color:var(--ink)">Off (human review only)</b> · Enrolled-device mode: <b style="color:var(--ink)">Not enabled this phase</b></p>
+      </div>
+    </div>
+
+    <div class="footnote">This is a clickable concept mockup to visualize Sentra's interface before any code is built — all data shown is fictional.</div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"><span>&#10003;</span><span id="toast-text"></span></div>
+
+<script>
+  const incidents = [
+    { id:1, risk:'critical', type:'behavioral', typeLabel:'Behavioral', summary:'Platform-switch request + late-night contact spike', who:'chill_gamer22 · iPad-Rm14-07', time:'2 min ago', status:'pending', statusLabel:'Pending review',
+      contact:'chill_gamer22', meta:'New contact on Discord · added 2 days ago · device: iPad-Rm14-07', score:86,
+      timeline:[
+        {icon:'&#128100;', title:'New contact added', desc:'Appeared on a monitored platform, no prior history with this student.', flag:'clear'},
+        {icon:'&#128248;', title:'Identity check', desc:'Profile photo matches a stock image found via reverse-image search.', flag:'flagged'},
+        {icon:'&#128200;', title:'Usage-pattern watch', desc:'Messaging spiked 340% between 11PM–2AM; contact asked to "switch to Snap".', flag:'flagged'},
+        {icon:'&#9878;', title:'Risk score', desc:'Weighted score from the signals above: 86 / 100.', flag:'flagged'},
+        {icon:'&#128101;', title:'Human review', desc:'Queued for J. Alvarez, Safety Officer — no auto-action taken.', flag:'flagged'},
+      ]},
+    { id:2, risk:'high', type:'identity', typeLabel:'Identity', summary:'Reverse-image match: stock photo used as profile picture', who:'skater_kayla19 · Chromebook-08', time:'18 min ago', status:'pending', statusLabel:'Pending review',
+      contact:'skater_kayla19', meta:'New contact on Instagram · added 6 hours ago · device: Chromebook-08', score:64,
+      timeline:[
+        {icon:'&#128100;', title:'New contact added', desc:'Follow request accepted by student.', flag:'clear'},
+        {icon:'&#128248;', title:'Identity check', desc:'Profile photo flagged as a known stock/stolen image.', flag:'flagged'},
+        {icon:'&#128200;', title:'Usage-pattern watch', desc:'No unusual timing or platform-switch activity yet.', flag:'clear'},
+        {icon:'&#9878;', title:'Risk score', desc:'Weighted score from the signals above: 64 / 100.', flag:'flagged'},
+        {icon:'&#128101;', title:'Human review', desc:'Queued for review — identity concern only, low urgency.', flag:'flagged'},
+      ]},
+    { id:3, risk:'medium', type:'behavioral', typeLabel:'Behavioral', summary:'Unusual contact-frequency increase, no platform switch yet', who:'unknown_contact_88 · iPad-Rm09-03', time:'1h ago', status:'pending', statusLabel:'Pending review',
+      contact:'unknown_contact_88', meta:'Existing contact on Roblox · known 3 weeks · device: iPad-Rm09-03', score:41,
+      timeline:[
+        {icon:'&#128100;', title:'Contact history', desc:'Ongoing contact, previously low-risk.', flag:'clear'},
+        {icon:'&#128248;', title:'Identity check', desc:'No issues found with this profile.', flag:'clear'},
+        {icon:'&#128200;', title:'Usage-pattern watch', desc:'Message frequency up 60% this week, still within normal range.', flag:'flagged'},
+        {icon:'&#9878;', title:'Risk score', desc:'Weighted score from the signals above: 41 / 100.', flag:'clear'},
+        {icon:'&#128101;', title:'Human review', desc:'Queued for routine review, no urgency.', flag:'clear'},
+      ]},
+    { id:4, risk:'low', type:'network', typeLabel:'Network', summary:'Connection attempt to known phishing domain — auto-blocked', who:'11 devices · network-wide', time:'2h ago', status:'blocked', statusLabel:'Auto-blocked',
+      contact:'phish-schoolportal-login.com', meta:'Network-level detection · matched AbuseIPDB feed · 11 devices affected', score:22,
+      timeline:[
+        {icon:'&#127760;', title:'Connection attempt', desc:'Device attempted to reach a known lookalike domain.', flag:'flagged'},
+        {icon:'&#9989;', title:'Threat-intel match', desc:'Domain matched against PhishTank / AbuseIPDB feeds.', flag:'flagged'},
+        {icon:'&#128274;', title:'Auto-block', desc:'Blocked automatically per network policy — no human review needed.', flag:'clear'},
+      ]},
+    { id:5, risk:'low', type:'network', typeLabel:'Network', summary:'Malware file hash detected in download — auto-blocked', who:'Chromebook-31', time:'3h ago', status:'blocked', statusLabel:'Auto-blocked',
+      contact:'suspicious_file.exe', meta:'Network-level detection · matched URLhaus feed · device: Chromebook-31', score:19,
+      timeline:[
+        {icon:'&#128190;', title:'Download attempt', desc:'File hash matched a known malware signature.', flag:'flagged'},
+        {icon:'&#128274;', title:'Auto-block', desc:'Blocked automatically per network policy — no human review needed.', flag:'clear'},
+      ]},
+    { id:6, risk:'high', type:'behavioral', typeLabel:'Behavioral', summary:'Secrecy pattern: contact asked student to delete chat history', who:'xX_shadow_Xx · iPhone-enrolled-12', time:'5h ago', status:'reviewed', statusLabel:'Reviewed — escalated',
+      contact:'xX_shadow_Xx', meta:'New contact on Snapchat · added yesterday · device: iPhone-enrolled-12', score:79,
+      timeline:[
+        {icon:'&#128100;', title:'New contact added', desc:'Appeared on a monitored platform.', flag:'clear'},
+        {icon:'&#128248;', title:'Identity check', desc:'Photo could not be verified either way.', flag:'clear'},
+        {icon:'&#128200;', title:'Usage-pattern watch', desc:'Request detected to delete chat history — classic secrecy pattern.', flag:'flagged'},
+        {icon:'&#9878;', title:'Risk score', desc:'Weighted score from the signals above: 79 / 100.', flag:'flagged'},
+        {icon:'&#128101;', title:'Human review', desc:'Reviewed by R. Patel — escalated to guardian contact.', flag:'flagged'},
+      ]},
+  ];
+
+  const riskLabel = { low:'Low', medium:'Medium', high:'High', critical:'Critical' };
+  const riskColorVar = { low:'--good', medium:'--warning', high:'--serious', critical:'--critical' };
+
+  function renderTable(){
+    const tbody = document.getElementById('incident-tbody');
+    tbody.innerHTML = incidents.map(i => `
+      <tr onclick="openIncident(${i.id})">
+        <td><span class="badge risk-${i.risk}"><i class="dot-${i.risk}"></i> ${riskLabel[i.risk]}</span></td>
+        <td><span class="tag ${i.type}"><i></i> ${i.typeLabel}</span></td>
+        <td>${i.summary}</td>
+        <td class="muted">${i.who}</td>
+        <td class="muted">${i.time}</td>
+        <td><span class="status-text ${i.status}">${i.statusLabel}</span></td>
+      </tr>
+    `).join('');
+  }
+
+  function openIncident(id){
+    const i = incidents.find(x => x.id === id);
+    if(!i) return;
+    document.getElementById('d-contact').textContent = i.contact;
+    document.getElementById('d-meta').textContent = i.meta;
+    const badge = document.getElementById('d-badge');
+    badge.className = `badge risk-${i.risk}`;
+    badge.innerHTML = `<i class="dot-${i.risk}"></i> ${riskLabel[i.risk]}`;
+    document.getElementById('d-score').textContent = `${i.score} / 100`;
+    const meter = document.getElementById('d-meter');
+    meter.style.width = i.score + '%';
+    meter.style.background = `var(${riskColorVar[i.risk]})`;
+
+    document.getElementById('d-timeline').innerHTML = i.timeline.map(step => `
+      <div class="tl-step">
+        <div class="tl-icon">${step.icon}</div>
+        <div class="tl-body">
+          <div class="tl-title">${step.title} <span class="flag ${step.flag}">${step.flag === 'flagged' ? 'Flagged' : 'Clear'}</span></div>
+          <div class="tl-desc">${step.desc}</div>
+        </div>
+      </div>
+    `).join('');
+
+    showView('detail');
+  }
+
+  function showView(name){
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + name).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const nav = document.querySelector(`.nav-item[data-view="${name}"]`);
+    if(nav) nav.classList.add('active');
+    if(name !== 'overview' && name !== 'queue' && name !== 'campaigns' && name !== 'evidence' && name !== 'settings'){
+      // detail view — leave sidebar as-is
+    }
+    document.querySelector('.main').scrollTo(0,0);
+  }
+
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => showView(item.getAttribute('data-view')));
+  });
+
+  let toastTimer;
+  function toast(msg){
+    const t = document.getElementById('toast');
+    document.getElementById('toast-text').textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+  }
+
+  renderTable();
+</script>
+</body>
+</html>
