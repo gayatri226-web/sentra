@@ -1,13 +1,15 @@
+import { HiOutlineUserAdd, HiOutlineChartBar, HiOutlineMoon, HiOutlineSwitchHorizontal, HiOutlineCamera, HiOutlineGlobeAlt } from "react-icons/hi";
+import type { IconType } from "react-icons";
 import type { Incident } from "@/lib/types";
 import { SIGNAL_LABELS } from "@/lib/types";
 
-const SIGNAL_ICON: Record<string, string> = {
-  new_contact: "\uD83D\uDC64",
-  message_burst: "\uD83D\uDCC8",
-  late_night_activity: "\uD83C\uDF19",
-  cross_app_transition: "\uD83D\uDD01",
-  identity_flag: "\uD83D\uDCF8",
-  known_threat_domain: "\uD83C\uDF10",
+const SIGNAL_ICON: Record<string, IconType> = {
+  new_contact: HiOutlineUserAdd,
+  message_burst: HiOutlineChartBar,
+  late_night_activity: HiOutlineMoon,
+  cross_app_transition: HiOutlineSwitchHorizontal,
+  identity_flag: HiOutlineCamera,
+  known_threat_domain: HiOutlineGlobeAlt,
 };
 
 const SIGNAL_WEIGHT: Record<string, number> = {
@@ -28,7 +30,9 @@ const SIGNAL_WEIGHT: Record<string, number> = {
 export default function IncidentTimeline({ incident }: { incident: Incident }) {
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      {incident.signals_considered.map((signal, idx) => (
+      {incident.signals_considered.map((signal, idx) => {
+        const Icon = SIGNAL_ICON[signal];
+        return (
         <div
           key={`${signal}-${idx}`}
           style={{
@@ -55,7 +59,7 @@ export default function IncidentTimeline({ incident }: { incident: Incident }) {
               border: "1px solid var(--border)",
             }}
           >
-            {SIGNAL_ICON[signal] ?? "\u2022"}
+            {Icon ? <Icon size={16} color="var(--ink-2)" /> : "•"}
           </div>
           <div style={{ flex: 1 }}>
             <div
@@ -74,7 +78,7 @@ export default function IncidentTimeline({ incident }: { incident: Incident }) {
                   fontWeight: 700,
                   padding: "2px 7px",
                   borderRadius: 10,
-                  background: "rgba(208,59,59,0.16)",
+                  background: "rgba(239,68,68,0.16)",
                   color: "var(--critical)",
                 }}
               >
@@ -83,7 +87,8 @@ export default function IncidentTimeline({ incident }: { incident: Incident }) {
             </div>
           </div>
         </div>
-      ))}
+        );
+      })}
       <div
         style={{
           display: "flex",

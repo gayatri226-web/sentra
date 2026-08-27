@@ -2,13 +2,22 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  HiOutlineViewGrid,
+  HiOutlineFlag,
+  HiOutlineShieldCheck,
+  HiOutlineLockClosed,
+  HiOutlineCog,
+  HiOutlinePlay,
+} from "react-icons/hi";
 
 const NAV_ITEMS = [
-  { href: "/", label: "Overview", icon: "\u2637" },
-  { href: "/queue", label: "Review Queue", icon: "\u2691" },
-  { href: "/campaigns", label: "Campaigns", icon: "\u2637" },
-  { href: "/evidence", label: "Evidence Vault", icon: "\uD83D\uDD12" },
-  { href: "/settings", label: "Settings", icon: "\u2699" },
+  { href: "/dashboard", label: "Overview", icon: HiOutlineViewGrid },
+  { href: "/dashboard/live-test", label: "Live Test", icon: HiOutlinePlay },
+  { href: "/dashboard/queue", label: "Review Queue", icon: HiOutlineFlag },
+  { href: "/dashboard/campaigns", label: "Campaigns", icon: HiOutlineShieldCheck },
+  { href: "/dashboard/evidence", label: "Evidence Vault", icon: HiOutlineLockClosed },
+  { href: "/dashboard/settings", label: "Settings", icon: HiOutlineCog },
 ];
 
 export default function Sidebar() {
@@ -28,6 +37,7 @@ export default function Sidebar() {
     >
       {NAV_ITEMS.map((item) => {
         const active = pathname === item.href;
+        const Icon = item.icon;
         return (
           <Link
             key={item.href}
@@ -47,9 +57,7 @@ export default function Sidebar() {
               fontSize: 13,
             }}
           >
-            <span style={{ width: 16, textAlign: "center", opacity: 0.85 }}>
-              {item.icon}
-            </span>
+            <Icon size={16} style={{ opacity: 0.9, flexShrink: 0 }} />
             {item.label}
           </Link>
         );

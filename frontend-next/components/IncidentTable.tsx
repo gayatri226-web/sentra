@@ -27,10 +27,10 @@ function statusLabel(incident: Incident): {
     return { text: "Pending review", color: "var(--warning)" };
   }
   if (incident.status === "escalate") {
-    return { text: "Reviewed \u2014 escalated", color: "var(--ink-2)" };
+    return { text: "Reviewed — escalated", color: "var(--ink-2)" };
   }
   if (incident.status === "false_positive") {
-    return { text: "Closed \u2014 false positive", color: "var(--ink-2)" };
+    return { text: "Closed — false positive", color: "var(--ink-2)" };
   }
   return { text: "Resolved", color: "var(--ink-2)" };
 }
@@ -78,7 +78,7 @@ export default function IncidentTable({ incidents }: { incidents: Incident[] }) 
           return (
             <tr
               key={incident.incident_id}
-              onClick={() => router.push(`/incident/${incident.incident_id}`)}
+              onClick={() => router.push(`/dashboard/incident/${incident.incident_id}`)}
               style={{ cursor: "pointer" }}
               onMouseEnter={(e) =>
                 (e.currentTarget.style.background = "var(--surface-2)")
@@ -93,7 +93,7 @@ export default function IncidentTable({ incidents }: { incidents: Incident[] }) 
               </td>
               <td style={cellStyle}>
                 {SIGNAL_LABELS[incident.event_type]}
-                {incident.detail ? ` \u2014 ${incident.detail}` : ""}
+                {incident.detail ? ` — ${incident.detail}` : ""}
               </td>
               <td style={{ ...cellStyle, color: "var(--ink-muted)" }}>
                 {incident.contact_handle ?? incident.device_name} &middot;{" "}

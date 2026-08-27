@@ -1,26 +1,38 @@
 :root {
-  --page: #0d0d0d;
-  --surface: #1a1a19;
-  --surface-2: #212120;
-  --ink: #ffffff;
-  --ink-2: #c3c2b7;
-  --ink-muted: #898781;
-  --border: rgba(255, 255, 255, 0.1);
-  --grid: #2c2c2a;
+  --page: #08090c;
+  --surface: #12141a;
+  --surface-2: #1a1d26;
+  --ink: #f4f5f7;
+  --ink-2: #b8bcc8;
+  --ink-muted: #6b7280;
+  --border: rgba(255, 255, 255, 0.08);
+  --grid: #23262f;
 
-  --good: #0ca30c;
-  --warning: #fab219;
-  --serious: #ec835a;
-  --critical: #d03b3b;
+  --good: #22c55e;
+  --warning: #f5b73d;
+  --serious: #f0805a;
+  --critical: #ef4444;
 
-  --brand: #ef3a54;
-  --brand-dim: rgba(239, 58, 84, 0.14);
+  --brand: #6366f1;
+  --brand-2: #ec4899;
+  --brand-dim: rgba(99, 102, 241, 0.14);
+  --brand-glow: rgba(99, 102, 241, 0.35);
 
-  --type-network: #3987e5;
-  --type-behavioral: #9085e9;
-  --type-identity: #199e70;
+  --type-network: #38bdf8;
+  --type-behavioral: #a78bfa;
+  --type-identity: #34d399;
 
-  --font: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Segoe UI Semibold", "Trebuchet MS", "Century Gothic",
+    system-ui, sans-serif;
+  --font-body: system-ui, -apple-system, "Segoe UI", "Helvetica Neue",
+    Arial, sans-serif;
+}
+
+@supports (font-variation-settings: normal) {
+  :root {
+    --font-display: "Segoe UI Variable Display", "Segoe UI Semibold",
+      "Trebuchet MS", system-ui, sans-serif;
+  }
 }
 
 * {
@@ -33,12 +45,21 @@ body {
   padding: 0;
   background: var(--page);
   color: var(--ink);
-  font-family: var(--font);
+  font-family: var(--font-body);
 }
 
 body {
   font-size: 14px;
   line-height: 1.45;
+  background-image:
+    radial-gradient(circle at 15% 0%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 85% 20%, rgba(236, 72, 153, 0.05) 0%, transparent 40%);
+  background-attachment: fixed;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
 }
 
 a {
@@ -52,4 +73,8 @@ button {
 
 .muted {
   color: var(--ink-muted);
+}
+
+code, .mono {
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
 }

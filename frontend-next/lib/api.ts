@@ -1,7 +1,5 @@
 import type { Incident, Device, OperatorType, IncidentStatus } from "./types";
 
-// Point this at your running FastAPI backend. Override with an env var
-// (NEXT_PUBLIC_API_BASE) if it's not running on the default port.
 export const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8000";
 
@@ -12,8 +10,6 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       "Content-Type": "application/json",
       ...(init?.headers ?? {}),
     },
-    // Always get fresh data — this is a live safety dashboard, not a
-    // static site. Next.js caches fetches by default; opt out explicitly.
     cache: "no-store",
   });
 
@@ -37,6 +33,16 @@ export function getIncident(incidentId: string): Promise<Incident> {
 export function getDevices(operatorType?: OperatorType): Promise<Device[]> {
   const query = operatorType ? `?operator_type=${operatorType}` : "";
   return request<Device[]>(`/devices${query}`);
+}
+
+export interface Reviewer {
+  name: string;
+  title: string;
+  org: string;
+}
+
+export function getReviewer(role: string): Promise<Reviewer> {
+  return request<Reviewer>(`/reviewers/${role}`);
 }
 
 export function reviewIncident(

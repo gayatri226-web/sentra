@@ -1,10 +1,38 @@
-export default function TopBar({
-  subtitle,
-  userLabel,
-}: {
-  subtitle: string;
-  userLabel: string;
-}) {
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { HiOutlineShieldExclamation, HiOutlineLogout } from "react-icons/hi";
+import { getReviewer, type Reviewer } from "@/lib/api";
+
+const SUBTITLE: Record<string, string> = {
+  school: "Safety Console · Riverside High (Pilot)",
+  individual: "Safety Console · Family Mode",
+};
+
+export default function TopBar() {
+  const router = useRouter();
+  const [role, setRole] = useState<string>("school");
+  const [reviewer, setReviewer] = useState<Reviewer | null>(null);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("sentra_role") ?? "school";
+    setRole(stored);
+    getReviewer(stored)
+      .then(setReviewer)
+      .catch(() => setReviewer(null));
+  }, []);
+
+  function handleLogout() {
+    localStorage.removeItem("sentra_role");
+    router.push("/login");
+  }
+
+  const userLabel = reviewer ? `${reviewer.name} · ${reviewer.title}` : "Loading…";
+  const initials = reviewer
+    ? reviewer.name.split(" ").map((w) => w[0]).slice(0, 2).join("")
+    : "…";
+
   return (
     <div
       style={{
@@ -18,15 +46,15 @@ export default function TopBar({
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <HiOutlineShieldExclamation size={20} color="var(--brand)" />
         <span
           style={{
-            width: 9,
-            height: 9,
-            borderRadius: 2,
-            background: "var(--brand)",
+            fontFamily: "var(--font-display)",
+            fontWeight: 700,
+            letterSpacing: "0.06em",
+            fontSize: 16,
           }}
-        />
-        <span style={{ fontWeight: 700, letterSpacing: "0.08em", fontSize: 15 }}>
+        >
           SENTRA
         </span>
         <span
@@ -38,7 +66,7 @@ export default function TopBar({
             borderLeft: "1px solid var(--border)",
           }}
         >
-          {subtitle}
+          {SUBTITLE[role] ?? SUBTITLE.school}
         </span>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
@@ -61,7 +89,7 @@ export default function TopBar({
               height: 7,
               borderRadius: "50%",
               background: "var(--good)",
-              boxShadow: "0 0 0 3px rgba(12,163,12,0.18)",
+              boxShadow: "0 0 0 3px rgba(34,197,94,0.18)",
             }}
           />
           Monitoring active
@@ -80,7 +108,7 @@ export default function TopBar({
               width: 26,
               height: 26,
               borderRadius: "50%",
-              background: "var(--type-behavioral)",
+              background: "linear-gradient(135deg, var(--brand), var(--brand-2))",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -89,14 +117,28 @@ export default function TopBar({
               color: "#fff",
             }}
           >
-            {userLabel
-              .split(" ")
-              .map((w) => w[0])
-              .slice(0, 2)
-              .join("")}
+            {initials}
           </span>
           {userLabel}
         </div>
+        <button
+          onClick={handleLogout}
+          title="Switch role"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            background: "none",
+            border: "1px solid var(--border)",
+            color: "var(--ink-muted)",
+            padding: "6px 10px",
+            borderRadius: 8,
+            fontSize: 12,
+            cursor: "pointer",
+          }}
+        >
+          <HiOutlineLogout size={14} />
+        </button>
       </div>
     </div>
   );
