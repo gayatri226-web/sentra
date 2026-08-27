@@ -16,30 +16,40 @@
       "static/chunks/main-app.js",
       "static/chunks/app/page.js"
     ],
-    "/dashboard/page": [
+    "/dashboard/incident/[id]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/page.js"
+      "static/chunks/app/dashboard/incident/[id]/page.js"
     ],
     "/dashboard/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/dashboard/layout.js"
     ],
-    "/dashboard/incident/[id]/page": [
+    "/dashboard/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/incident/[id]/page.js"
+      "static/chunks/app/dashboard/page.js"
     ],
-    "/dashboard/queue/page": [
+    "/dashboard/live-test/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/queue/page.js"
+      "static/chunks/app/dashboard/live-test/page.js"
     ],
     "/dashboard/campaigns/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/dashboard/campaigns/page.js"
+    ],
+    "/dashboard/threat-map/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/dashboard/threat-map/page.js"
+    ],
+    "/dashboard/queue/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/dashboard/queue/page.js"
     ],
     "/dashboard/evidence/page": [
       "static/chunks/webpack.js",
@@ -50,11 +60,6 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/dashboard/settings/page.js"
-    ],
-    "/dashboard/live-test/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/live-test/page.js"
     ]
   }
 }

@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { HiOutlineShieldExclamation, HiOutlineLogout } from "react-icons/hi";
+import Link from "next/link";
+import { HiOutlineShieldExclamation, HiOutlineLogout, HiOutlineHome } from "react-icons/hi";
 import { getReviewer, type Reviewer } from "@/lib/api";
 
 const SUBTITLE: Record<string, string> = {
@@ -46,17 +47,20 @@ export default function TopBar() {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <HiOutlineShieldExclamation size={20} color="var(--brand)" />
-        <span
-          style={{
-            fontFamily: "var(--font-display)",
-            fontWeight: 700,
-            letterSpacing: "0.06em",
-            fontSize: 16,
-          }}
-        >
-          SENTRA
-        </span>
+        <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <HiOutlineShieldExclamation size={20} color="var(--brand)" />
+          <span
+            style={{
+              fontFamily: "var(--font-display)",
+              fontWeight: 700,
+              letterSpacing: "0.06em",
+              fontSize: 16,
+              color: "var(--ink)",
+            }}
+          >
+            SENTRA
+          </span>
+        </Link>
         <span
           style={{
             color: "var(--ink-muted)",
@@ -121,6 +125,23 @@ export default function TopBar() {
           </span>
           {userLabel}
         </div>
+        <Link
+          href="/"
+          title="Back to home"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            background: "none",
+            border: "1px solid var(--border)",
+            color: "var(--ink-muted)",
+            padding: "6px 10px",
+            borderRadius: 8,
+            fontSize: 12,
+          }}
+        >
+          <HiOutlineHome size={14} />
+        </Link>
         <button
           onClick={handleLogout}
           title="Switch role"

@@ -1,6 +1,7 @@
 "use client";
 
 import { HiOutlineLockClosed, HiArrowLeft } from "react-icons/hi";
+import RiskGauge from "@/components/RiskGauge";
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import type { Incident } from "@/lib/types";
@@ -116,39 +117,42 @@ export default function IncidentDetailPage() {
               <RiskBadge severity={incident.severity} />
             </div>
 
-            <div style={{ marginTop: 16 }}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontSize: 12,
-                  color: "var(--ink-muted)",
-                  marginBottom: 6,
-                }}
-              >
-                <span>Risk score</span>
-                <span style={{ fontWeight: 700, color: "var(--ink)" }}>
-                  {incident.score} / 100
-                </span>
-              </div>
-              <div
-                style={{
-                  height: 10,
-                  borderRadius: 6,
-                  background: "rgba(255,255,255,0.06)",
-                  overflow: "hidden",
-                }}
-              >
-                <div
-                  style={{
-                    height: "100%",
-                    borderRadius: 6,
-                    width: `${incident.score}%`,
-                    background: SEVERITY_COLOR[incident.severity],
-                  }}
-                />
-              </div>
+            <div style={{ marginTop: 12, display: "flex", justifyContent: "center" }}>
+              <RiskGauge score={incident.score} severity={incident.severity} />
             </div>
+
+            {incident.risk_trajectory && incident.risk_trajectory.length > 1 && (
+              <div
+                style={{
+                  marginTop: 10,
+                  fontSize: 11.5,
+                  color: "var(--ink-muted)",
+                  textAlign: "center",
+                }}
+              >
+                Trajectory: {incident.risk_trajectory.join(" → ")}
+                {incident.risk_accelerating && (
+                  <span style={{ color: "var(--critical)", marginLeft: 6 }}>(accelerating)</span>
+                )}
+              </div>
+            )}
+
+            {incident.friction_message && (
+              <div
+                style={{
+                  marginTop: 10,
+                  fontSize: 12,
+                  color: "var(--warning)",
+                  background: "rgba(245,183,61,0.1)",
+                  border: "1px solid rgba(245,183,61,0.3)",
+                  borderRadius: 8,
+                  padding: "8px 12px",
+                  textAlign: "center",
+                }}
+              >
+                {incident.friction_message}
+              </div>
+            )}
           </Card>
 
           <Card>

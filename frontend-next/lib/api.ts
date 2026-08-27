@@ -54,3 +54,21 @@ export function reviewIncident(
     { method: "POST" }
   );
 }
+
+export interface Region {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  incident_count: number;
+  max_severity: string;
+  device_count: number;
+}
+
+export function getRegions(): Promise<Region[]> {
+  return request<Region[]>("/regions");
+}
+
+export function getHourlyStats(): Promise<{ buckets: number[] }> {
+  return request<{ buckets: number[] }>("/stats/hourly");
+}

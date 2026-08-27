@@ -1,8 +1,10 @@
 {
-  "/login/page": "app/login/page.js",
   "/page": "app/page.js",
-  "/dashboard/incident/[id]/page": "app/dashboard/incident/[id]/page.js",
-  "/dashboard/settings/page": "app/dashboard/settings/page.js",
   "/dashboard/page": "app/dashboard/page.js",
-  "/dashboard/live-test/page": "app/dashboard/live-test/page.js"
+  "/dashboard/threat-map/page": "app/dashboard/threat-map/page.js",
+  "/dashboard/queue/page": "app/dashboard/queue/page.js",
+  "/dashboard/incident/[id]/page": "app/dashboard/incident/[id]/page.js",
+  "/dashboard/live-test/page": "app/dashboard/live-test/page.js",
+  "/dashboard/campaigns/page": "app/dashboard/campaigns/page.js",
+  "/dashboard/evidence/page": "app/dashboard/evidence/page.js"
 }

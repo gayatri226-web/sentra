@@ -1,7 +1,3 @@
-// These types mirror the FastAPI backend's response shapes exactly
-// (see backend/main.py). Keeping them in one place means a backend
-// field change surfaces as a type error here, not a silent bug in the UI.
-
 export type OperatorType = "school" | "individual";
 
 export type Severity = "low" | "medium" | "high" | "critical";
@@ -50,13 +46,18 @@ export interface Incident {
   requires_human_review: boolean;
   evidence_locked: boolean;
   evidence_hash: string | null;
+  evidence_prev_hash?: string | null;
+  risk_trajectory?: number[];
+  previous_score?: number;
+  score_delta?: number;
+  risk_accelerating?: boolean;
+  friction_state?: string;
+  friction_message?: string | null;
   status: IncidentStatus;
   created_at: string;
   reviewed_at?: string;
 }
 
-// Client-side derived category, used only for display grouping/coloring —
-// the backend doesn't need to know about this, it's a UI concern.
 export type SignalCategory = "network" | "behavioral" | "identity";
 
 export function categoryOf(event_type: EventType): SignalCategory {

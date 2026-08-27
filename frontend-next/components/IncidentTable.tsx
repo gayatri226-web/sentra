@@ -35,7 +35,15 @@ function statusLabel(incident: Incident): {
   return { text: "Resolved", color: "var(--ink-2)" };
 }
 
-export default function IncidentTable({ incidents }: { incidents: Incident[] }) {
+export default function IncidentTable({
+  incidents,
+  onSelect,
+  selectedId,
+}: {
+  incidents: Incident[];
+  onSelect?: (incident: Incident) => void;
+  selectedId?: string;
+}) {
   const router = useRouter();
 
   if (incidents.length === 0) {
@@ -78,8 +86,16 @@ export default function IncidentTable({ incidents }: { incidents: Incident[] }) 
           return (
             <tr
               key={incident.incident_id}
-              onClick={() => router.push(`/dashboard/incident/${incident.incident_id}`)}
-              style={{ cursor: "pointer" }}
+              onClick={() =>
+                onSelect
+                  ? onSelect(incident)
+                  : router.push(`/dashboard/incident/${incident.incident_id}`)
+              }
+              style={{
+                cursor: "pointer",
+                background:
+                  selectedId === incident.incident_id ? "var(--surface-2)" : "",
+              }}
               onMouseEnter={(e) =>
                 (e.currentTarget.style.background = "var(--surface-2)")
               }

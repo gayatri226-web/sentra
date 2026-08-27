@@ -9,11 +9,13 @@ import {
   HiOutlineLockClosed,
   HiOutlineCog,
   HiOutlinePlay,
+  HiOutlineGlobeAlt,
 } from "react-icons/hi";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Overview", icon: HiOutlineViewGrid },
   { href: "/dashboard/live-test", label: "Live Test", icon: HiOutlinePlay },
+  { href: "/dashboard/threat-map", label: "Threat Map", icon: HiOutlineGlobeAlt },
   { href: "/dashboard/queue", label: "Review Queue", icon: HiOutlineFlag },
   { href: "/dashboard/campaigns", label: "Campaigns", icon: HiOutlineShieldCheck },
   { href: "/dashboard/evidence", label: "Evidence Vault", icon: HiOutlineLockClosed },

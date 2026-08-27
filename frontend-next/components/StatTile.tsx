@@ -1,4 +1,5 @@
 import type { IconType } from "react-icons";
+import Sparkline from "././Sparkline";
 
 export default function StatTile({
   label,
@@ -7,6 +8,7 @@ export default function StatTile({
   hintTone = "neutral",
   icon: Icon,
   accent = "var(--brand)",
+  trend,
 }: {
   label: string;
   value: string | number;
@@ -14,6 +16,7 @@ export default function StatTile({
   hintTone?: "neutral" | "up" | "down";
   icon?: IconType;
   accent?: string;
+  trend?: number[];
 }) {
   const hintColor =
     hintTone === "up"
@@ -90,6 +93,11 @@ export default function StatTile({
       {hint && (
         <div style={{ marginTop: 8, fontSize: 11.5, color: hintColor }}>
           {hint}
+        </div>
+      )}
+      {trend && trend.length > 1 && (
+        <div style={{ marginTop: 10 }}>
+          <Sparkline values={trend} color={accent} />
         </div>
       )}
     </div>
