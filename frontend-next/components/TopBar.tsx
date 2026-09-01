@@ -3,41 +3,49 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { HiOutlineShieldExclamation, HiOutlineLogout, HiOutlineHome } from "react-icons/hi";
-import { getReviewer, type Reviewer } from "@/lib/api";
+import { HiOutlineShieldExclamation, HiOutlineLogout, HiOutlineHome, HiOutlineMenu } from "react-icons/hi";
 
 const SUBTITLE: Record<string, string> = {
-  school: "Safety Console · Riverside High (Pilot)",
+  school: "Safety Console",
   individual: "Safety Console · Family Mode",
 };
 
-export default function TopBar() {
+const ROLE_TITLE: Record<string, string> = {
+  school: "Safety Officer",
+  individual: "Guardian",
+};
+
+export default function TopBar({ onMenuClick }: { onMenuClick?: () => void }) {
   const router = useRouter();
   const [role, setRole] = useState<string>("school");
-  const [reviewer, setReviewer] = useState<Reviewer | null>(null);
+  const [name, setName] = useState<string>("");
+  const [org, setOrg] = useState<string>("");
 
   useEffect(() => {
-    const stored = localStorage.getItem("sentra_role") ?? "school";
-    setRole(stored);
-    getReviewer(stored)
-      .then(setReviewer)
-      .catch(() => setReviewer(null));
+    setRole(localStorage.getItem("sentra_role") ?? "school");
+    setName(localStorage.getItem("sentra_name") ?? "");
+    setOrg(localStorage.getItem("sentra_org") ?? "");
   }, []);
 
   function handleLogout() {
     localStorage.removeItem("sentra_role");
+    localStorage.removeItem("sentra_name");
+    localStorage.removeItem("sentra_org");
     router.push("/login");
   }
 
-  const userLabel = reviewer ? `${reviewer.name} · ${reviewer.title}` : "Loading…";
-  const initials = reviewer
-    ? reviewer.name.split(" ").map((w) => w[0]).slice(0, 2).join("")
-    : "…";
+  const userLabel = name ? `${name} · ${ROLE_TITLE[role] ?? ""}` : ROLE_TITLE[role] ?? "";
+  const initials = name
+    ? name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()
+    : "?";
 
   return (
     <div
       style={{
-        gridArea: "header",
+        position: "sticky",
+        top: 0,
+        zIndex: 20,
+        height: 60,
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
@@ -46,7 +54,22 @@ export default function TopBar() {
         background: "var(--surface)",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        <button
+          onClick={onMenuClick}
+          aria-label="Toggle menu"
+          style={{
+            background: "none",
+            border: "1px solid var(--border)",
+            borderRadius: 8,
+            padding: 7,
+            cursor: "pointer",
+            color: "var(--ink-2)",
+            display: "flex",
+          }}
+        >
+          <HiOutlineMenu size={16} />
+        </button>
         <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <HiOutlineShieldExclamation size={20} color="var(--brand)" />
           <span
@@ -65,12 +88,13 @@ export default function TopBar() {
           style={{
             color: "var(--ink-muted)",
             fontSize: 12,
-            marginLeft: 10,
+            marginLeft: 4,
             paddingLeft: 10,
             borderLeft: "1px solid var(--border)",
           }}
         >
           {SUBTITLE[role] ?? SUBTITLE.school}
+          {org ? ` · ${org}` : ""}
         </span>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
@@ -98,33 +122,35 @@ export default function TopBar() {
           />
           Monitoring active
         </div>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            fontSize: 12,
-            color: "var(--ink-2)",
-          }}
-        >
-          <span
+        {name && (
+          <div
             style={{
-              width: 26,
-              height: 26,
-              borderRadius: "50%",
-              background: "linear-gradient(135deg, var(--brand), var(--brand-2))",
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              fontSize: 11,
-              fontWeight: 700,
-              color: "#fff",
+              gap: 8,
+              fontSize: 12,
+              color: "var(--ink-2)",
             }}
           >
-            {initials}
-          </span>
-          {userLabel}
-        </div>
+            <span
+              style={{
+                width: 26,
+                height: 26,
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, var(--brand), var(--brand-2))",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 11,
+                fontWeight: 700,
+                color: "#fff",
+              }}
+            >
+              {initials}
+            </span>
+            {userLabel}
+          </div>
+        )}
         <Link
           href="/"
           title="Back to home"
